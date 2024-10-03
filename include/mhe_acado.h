@@ -27,6 +27,8 @@ struct nmhe_struct_
 	Eigen::VectorXd process_noise_cov;
 	Eigen::VectorXd SAC;
 	Eigen::VectorXd xAC;
+	double sample_time;
+
 };
 
 class NMHE_FXFYFZ
@@ -95,9 +97,9 @@ class NMHE_FXFYFZ
 
 		void nmhe_init(struct acado_struct &acadostruct);
 
-		void nmhe_core(struct acado_struct &acadostruct, struct estimation_struct &estimationstruct, Eigen::VectorXd &currentvelrate, Eigen::Vector3d &nmpccmdryp, Eigen::Vector2d &nmpccmdFz);
+		void nmhe_core(struct acado_struct &acadostruct, struct estimation_struct &estimationstruct, Eigen::VectorXd &velocity, Eigen::Vector3d &control);
 
-		void publish_uvw_FxFyFz(struct estimation_struct &estimationstruct);
+		//void publish_uvw_FxFyFz(struct estimation_struct &estimationstruct);
 
 	protected:
 		//ros::NodeHandle private_nh;

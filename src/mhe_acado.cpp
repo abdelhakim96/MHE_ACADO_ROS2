@@ -243,10 +243,10 @@ void NMHE_FXFYFZ::nmhe_init( struct acado_struct &acadostruct)
 }
 
 void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_struct &estimationstruct,
-                            Eigen::VectorXd &currentvelrate, Eigen::Vector3d &nmpccmdryp, Eigen::Vector2d &nmpccmdFz)
+                            Eigen::VectorXd &currentvelrate, Eigen::Vector3d &control_cmd)
 {
     Vector3d nmpc_cmd;
-    nmpc_cmd << nmpccmdryp(0), nmpccmdryp(1), nmpccmdFz(0);
+    nmpc_cmd << control_cmd(0), control_cmd(1), control_cmd(2);
 
 //    std::cout<<"currentvelrate = "<<currentvelrate<<"\n";
 //    std::cout<<"-------------------"<<"\n";
@@ -292,30 +292,11 @@ void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_
 
     acadostruct.updateArrivalCost(0);                       // pass 0 to just update the arrival cost
 
-/*
-    std::cout<<"nmheVariables.xAC = ";
-    for (int i = 0; i < acadostruct.acado_NX; ++i)
-        std::cout<<nmheVariables.xAC[i]<<", ";
-    std::cout<<"\n";
 
-    std::cout<<"WL = ";
-    for(int i = 0; i < acadostruct.acado_NX; ++i )
-    {
-        for(int j = 0; j < acadostruct.acado_NX; ++j )
-        {
-            std::cout<<nmheVariables.WL[(i * acadostruct.acado_NX) + j]<<", ";
-        }
-        std::cout<<"\n";
-    }
-*/
 
     // Settings for the next iteration
     acadostruct.preparationStep();
 
-//    ROS_INFO_STREAM("Stoptime NMHE_mFxFylearning: " << ros::Time::now().toSec() - stopwatch.toSec() << " (sec)");
-    /* ------ NMHE_DEBUG ------*/
-//    acadostruct.printDifferentialVariables();
-//    acadostruct.printControlVariables();
 
 }
 
