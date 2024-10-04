@@ -42,7 +42,6 @@ extern "C"
 #define NMHE_QPDUNES  3
 /** HPMPC QP solver indicator. */
 #define NMHE_HPMPC    4
-#define NMHE_GENERIC    5
 
 /** Indicator for determining the QP solver used by the ACADO solver code. */
 #define NMHE_QP_SOLVER NMHE_QPOASES
@@ -60,13 +59,11 @@ extern "C"
 /** Flag indicating whether constraint values are hard-coded or not. */
 #define NMHE_HARDCODED_CONSTRAINT_VALUES 1
 /** Indicator for fixed initial state. */
-#define NMHE_INITIAL_STATE_FIXED 0
+#define NMHE_INITIAL_STATE_FIXED 1
 /** Number of control/estimation intervals. */
 #define NMHE_N 40
 /** Number of online data values. */
-#define NMHE_NOD 3
-/** Number of path constraints. */
-#define NMHE_NPAC 0
+#define NMHE_NOD 1
 /** Number of control variables. */
 #define NMHE_NU 3
 /** Number of differential variables. */
@@ -76,13 +73,13 @@ extern "C"
 /** Number of differential derivative variables. */
 #define NMHE_NXD 0
 /** Number of references/measurements per node on the first N nodes. */
-#define NMHE_NY 6
+#define NMHE_NY 7
 /** Number of references/measurements on the last (N + 1)st node. */
 #define NMHE_NYN 3
 /** Total number of QP optimization variables. */
 #define NMHE_QP_NV 126
 /** Number of integration steps per shooting interval. */
-#define NMHE_RK_NIS 1
+#define NMHE_RK_NIS 2
 /** Number of Runge-Kutta stages per integration step. */
 #define NMHE_RK_NSTAGES 4
 /** Providing interface for arrival cost. */
@@ -116,17 +113,17 @@ real_t x[ 246 ];
  */
 real_t u[ 120 ];
 
-/** Matrix of size: 41 x 3 (row major format)
+/** Column vector of size: 41
  * 
  *  Matrix containing 41 online data vectors.
  */
-real_t od[ 123 ];
+real_t od[ 41 ];
 
-/** Column vector of size: 240
+/** Column vector of size: 280
  * 
- *  Matrix containing 40 reference/measurement vectors of size 6 for first 40 nodes.
+ *  Matrix containing 40 reference/measurement vectors of size 7 for first 40 nodes.
  */
-real_t y[ 240 ];
+real_t y[ 280 ];
 
 /** Column vector of size: 3
  * 
@@ -134,8 +131,8 @@ real_t y[ 240 ];
  */
 real_t yN[ 3 ];
 
-/** Matrix of size: 6 x 6 (row major format) */
-real_t W[ 36 ];
+/** Matrix of size: 7 x 7 (row major format) */
+real_t W[ 49 ];
 
 /** Matrix of size: 3 x 3 (row major format) */
 real_t WN[ 9 ];
@@ -158,6 +155,12 @@ real_t xAC[ 6 ];
  */
 real_t WL[ 36 ];
 
+/** Column vector of size: 6
+ * 
+ *  Current state feedback vector.
+ */
+real_t x0[ 6 ];
+
 
 } NMHEvariables;
 
@@ -169,25 +172,25 @@ real_t WL[ 36 ];
  */
 typedef struct NMHEworkspace_
 {
-/** Column vector of size: 10 */
-real_t rhs_aux[ 10 ];
+/** Column vector of size: 39 */
+real_t rhs_aux[ 39 ];
 
 real_t rk_ttt;
 
-/** Row vector of size: 66 */
-real_t rk_xxx[ 66 ];
+/** Row vector of size: 64 */
+real_t rk_xxx[ 64 ];
 
 /** Matrix of size: 4 x 60 (row major format) */
 real_t rk_kkk[ 240 ];
 
-/** Row vector of size: 66 */
-real_t state[ 66 ];
+/** Row vector of size: 64 */
+real_t state[ 64 ];
 
 /** Column vector of size: 240 */
 real_t d[ 240 ];
 
-/** Column vector of size: 240 */
-real_t Dy[ 240 ];
+/** Column vector of size: 280 */
+real_t Dy[ 280 ];
 
 /** Column vector of size: 3 */
 real_t DyN[ 3 ];
@@ -198,23 +201,23 @@ real_t evGx[ 1440 ];
 /** Matrix of size: 240 x 3 (row major format) */
 real_t evGu[ 720 ];
 
-/** Row vector of size: 12 */
-real_t objValueIn[ 12 ];
+/** Row vector of size: 10 */
+real_t objValueIn[ 10 ];
 
-/** Row vector of size: 6 */
-real_t objValueOut[ 6 ];
+/** Row vector of size: 7 */
+real_t objValueOut[ 7 ];
 
 /** Matrix of size: 240 x 6 (row major format) */
 real_t Q1[ 1440 ];
 
-/** Matrix of size: 240 x 6 (row major format) */
-real_t Q2[ 1440 ];
+/** Matrix of size: 240 x 7 (row major format) */
+real_t Q2[ 1680 ];
 
 /** Matrix of size: 120 x 3 (row major format) */
 real_t R1[ 360 ];
 
-/** Matrix of size: 120 x 6 (row major format) */
-real_t R2[ 720 ];
+/** Matrix of size: 120 x 7 (row major format) */
+real_t R2[ 840 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t QN1[ 36 ];
@@ -225,26 +228,26 @@ real_t QN2[ 18 ];
 /** Column vector of size: 6 */
 real_t DxAC[ 6 ];
 
-/** Matrix of size: 18 x 15 (row major format) */
-real_t acA[ 270 ];
+/** Matrix of size: 19 x 15 (row major format) */
+real_t acA[ 285 ];
 
-/** Column vector of size: 18 */
-real_t acb[ 18 ];
+/** Column vector of size: 19 */
+real_t acb[ 19 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t acP[ 36 ];
 
-/** Row vector of size: 19 */
-real_t rk_actemp[ 19 ];
+/** Row vector of size: 20 */
+real_t rk_actemp[ 20 ];
 
-/** Matrix of size: 6 x 6 (row major format) */
-real_t acVL[ 36 ];
+/** Matrix of size: 7 x 7 (row major format) */
+real_t acVL[ 49 ];
 
-/** Matrix of size: 6 x 6 (row major format) */
-real_t acHx[ 36 ];
+/** Matrix of size: 7 x 6 (row major format) */
+real_t acHx[ 42 ];
 
-/** Matrix of size: 6 x 3 (row major format) */
-real_t acHu[ 18 ];
+/** Matrix of size: 7 x 3 (row major format) */
+real_t acHu[ 21 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t acXx[ 36 ];
@@ -255,8 +258,11 @@ real_t acXu[ 18 ];
 /** Column vector of size: 6 */
 real_t acXTilde[ 6 ];
 
+/** Column vector of size: 7 */
+real_t acHTilde[ 7 ];
+
 /** Column vector of size: 6 */
-real_t acHTilde[ 6 ];
+real_t Dx0[ 6 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t T[ 36 ];

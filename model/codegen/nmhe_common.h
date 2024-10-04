@@ -42,7 +42,6 @@ extern "C"
 #define NMHE_QPDUNES  3
 /** HPMPC QP solver indicator. */
 #define NMHE_HPMPC    4
-#define NMHE_GENERIC    5
 
 /** Indicator for determining the QP solver used by the ACADO solver code. */
 #define NMHE_QP_SOLVER NMHE_QPOASES
@@ -60,13 +59,11 @@ extern "C"
 /** Flag indicating whether constraint values are hard-coded or not. */
 #define NMHE_HARDCODED_CONSTRAINT_VALUES 1
 /** Indicator for fixed initial state. */
-#define NMHE_INITIAL_STATE_FIXED 0
+#define NMHE_INITIAL_STATE_FIXED 1
 /** Number of control/estimation intervals. */
 #define NMHE_N 40
 /** Number of online data values. */
 #define NMHE_NOD 1
-/** Number of path constraints. */
-#define NMHE_NPAC 0
 /** Number of control variables. */
 #define NMHE_NU 3
 /** Number of differential variables. */
@@ -82,11 +79,9 @@ extern "C"
 /** Total number of QP optimization variables. */
 #define NMHE_QP_NV 126
 /** Number of integration steps per shooting interval. */
-#define NMHE_RK_NIS 1
+#define NMHE_RK_NIS 2
 /** Number of Runge-Kutta stages per integration step. */
 #define NMHE_RK_NSTAGES 4
-/** Single versus double precision data type representation. */
-#define NMHE_SINGLE_PRECISION 0
 /** Providing interface for arrival cost. */
 #define NMHE_USE_ARRIVAL_COST 1
 /** Indicator for usage of non-hard-coded linear terms in the objective. */
@@ -159,6 +154,12 @@ real_t xAC[ 6 ];
  *  Arrival cost term: Cholesky decomposition, lower triangular,  of the inverse of the state noise covariance matrix.
  */
 real_t WL[ 36 ];
+
+/** Column vector of size: 6
+ * 
+ *  Current state feedback vector.
+ */
+real_t x0[ 6 ];
 
 
 } NMHEvariables;
@@ -259,6 +260,9 @@ real_t acXTilde[ 6 ];
 
 /** Column vector of size: 7 */
 real_t acHTilde[ 7 ];
+
+/** Column vector of size: 6 */
+real_t Dx0[ 6 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t T[ 36 ];

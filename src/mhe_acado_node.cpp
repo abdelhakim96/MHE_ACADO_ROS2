@@ -31,6 +31,7 @@ void NMHENode::publish_uvw_FxFyFz( NMHE_FXFYFZ::estimation_struct& estimationstr
     // Publish data
     auto predInit_msg = std_msgs::msg::Bool();
 
+       std::cout << "Publishing disturbance prediction..." << std::endl;
 
 
     //predInit_msg.data = is_prediction_init_;
@@ -56,26 +57,47 @@ void NMHENode::publish_uvw_FxFyFz( NMHE_FXFYFZ::estimation_struct& estimationstr
    void  NMHENode::state_cb(const nav_msgs::msg::Odometry::ConstSharedPtr msg) {
 
         double roll = 0, pitch = 0, yaw = 0;
+       //std::cout << "state_cb " << std::endl;
+       //std::cout << "Velocity size before accessing: " << velocity_.size() << std::endl;
 
        attitude_quat_ = {
            msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w};
+        RCLCPP_INFO(this->get_logger(), "Velocity size: %zu", velocity_.size());
 
         velocity_.resize(6);
-         velocity_ << msg->twist.twist.linear.x, 
-                msg->twist.twist.linear.y, 
-                msg->twist.twist.linear.z, 
-                msg->twist.twist.angular.x, 
-                msg->twist.twist.angular.y, 
-                msg->twist.twist.angular.z;
+        // velocity_ << msg->twist.twist.linear.x, 
+        //        msg->twist.twist.linear.y, 
+        //        msg->twist.twist.linear.z, 
+        //        msg->twist.twist.angular.x, 
+        //        msg->twist.twist.angular.y, 
+         //       msg->twist.twist.angular.z;
+
+
+     velocity_ << 0.0, 
+               0.0, 
+               0.0, 
+               0.0, 
+               0.0, 
+               0.0;
 
     // For pose_, ensure it has 6 elements (3 for position, 3 for roll, pitch, yaw)
          pose_.resize(6);
-         pose_ = {msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, roll, pitch, yaw};
-       
+        // pose_ = {msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, roll, pitch, yaw};
+                pose_ = {0.0, 0.0, 0.0, 0.0,0.0, 0.0};
+
   }
 
     void NMHENode::control_cb(const geometry_msgs::msg::Wrench::ConstSharedPtr msg) {
-           control_input_ << msg->force.x, msg->force.y, msg->force.z;        
+            std::cout << "Received control input." << std::endl;
+
+
+
+         control_input_.resize(4);
+
+           //control_input_ << msg->force.x, msg->force.y, msg->force.z, 0.0;        
+           control_input_ << 0.0, 0.0, 0.0, 0.0;        
+
+
     }
 
 
@@ -85,6 +107,8 @@ void NMHENode::publish_uvw_FxFyFz( NMHE_FXFYFZ::estimation_struct& estimationstr
 
 
   void NMHENode::main_loop() {
+
+
 
         if (estimation_on_msg.data ) {
             RCLCPP_INFO(this->get_logger(), "Estimation switch turned on!");
@@ -101,7 +125,7 @@ void NMHENode::publish_uvw_FxFyFz( NMHE_FXFYFZ::estimation_struct& estimationstr
 
     
         // Publish results
-        //nmhe->publish_uvw_FxFyFz(nmhe->nmhe_est_struct);
+        this->publish_uvw_FxFyFz(nmhe->nmhe_est_struct);
     }
 
 
@@ -111,6 +135,8 @@ NMHENode::NMHENode() : Node("nmhe_node")
     // ---------------
     // Main loop timer
     // ---------------
+
+
     this-> main_loop_timer = this->create_wall_timer(SAMPLE_TIME, std::bind(&NMHENode::main_loop, this));
 
     // Initialize subscribers
@@ -128,6 +154,8 @@ NMHENode::NMHENode() : Node("nmhe_node")
 
     this->nmhe = new NMHE_FXFYFZ(this->nmhe_struct);     // create a new NMHE structure
 
+
+
     // Initialize publishers
     this->nmhe_vel_pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("nmhe_learning/uvw", 1);
     this->nmhe_dist_Fx_pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("nmhe_learning/Fx", 1);
@@ -135,20 +163,70 @@ NMHENode::NMHENode() : Node("nmhe_node")
     this->publish_uvw_FxFyFz(nmhe->nmhe_est_struct);
 
     // Roslaunch parameters
-      
 
+
+    // Hardcode the NMHE structure values
+     nmhe->nmhe_inp_struct.X0.resize(NMHE_NX);
+
+     nmhe->nmhe_inp_struct.W.resize(NMHE_NY);
+
+    nmhe->nmhe_inp_struct.WN.resize(NMHE_NYN);
+
+     nmhe->nmhe_inp_struct.process_noise_cov.resize(NMHE_NX);
+
+     nmhe->nmhe_inp_struct.SAC.resize(NMHE_NX);
+
+     nmhe->nmhe_inp_struct.xAC.resize(NMHE_NX);
+
+    // Hardcoded values
+     nmhe->nmhe_inp_struct.X0 << 0.0, 0.1, 0.2, 0.3, 0.4, 0.5;  // Example initial state
+
+     nmhe->nmhe_inp_struct.W << 1, 1, 1, 1, 1, 1, 1;  // Example weights
+
+     nmhe->nmhe_inp_struct.WN << 0.0002, 0.0002, 0.0002;  // Example terminal weights
+
+     nmhe->nmhe_inp_struct.process_noise_cov << 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;  // Example process noise covariance
+     nmhe->nmhe_inp_struct.SAC << 1, 1, 1, 1, 1, 1;  // Example SAC values
+     nmhe->nmhe_inp_struct.xAC = nmhe_struct.X0;  // Initialize xAC with X0
+
+
+
+     nmhe->nmhe_init(nmhe->nmhe_struct);
+
+
+    control_input_.resize(4);
+    velocity_.resize(6);
+
+     control_input_ << 0.0, 0.0, 0.0, 0.0;   
+     velocity_ << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;        
 
 }
 
 
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char **argv) {
+    std::cout << "Starting NMHE Node..." << std::endl;
+    //std::cout<<"NMHE_FXFYFZ: initialized correctly\n";
 
-       // Use a single-threaded executor - Node is not thread-safe
+
+
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<NMHENode>());
+
+    auto mhe_node = std::make_shared<NMHENode>();
+
+     //std::cout << mhe_node->nmhe_struct.X0[0] <<"  this->nmhe_struct.X0 ..." << std::endl;
+
+   // mhe_node->nmhe->nmhe_init(mhe_node->nmhe->nmhe_struct);
+
+
+
+    std::cout << "NMHE Node initialized ..." << std::endl;
+
+    rclcpp::spin(mhe_node);
+
     rclcpp::shutdown();
+
     return 0;
 }
 

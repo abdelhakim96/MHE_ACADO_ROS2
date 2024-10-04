@@ -30,7 +30,6 @@ find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(px4_msgs REQUIRED)
 find_package(ACADO REQUIRED )
 find_package(Eigen3 REQUIRED )
 find_package(tf2 REQUIRED)
@@ -102,7 +101,7 @@ set_target_properties(code_gen_drone PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE
 
 add_executable(mhe_acado_node src/mhe_acado_node.cpp)
 target_link_libraries(mhe_acado_node mhe_solver ${ACADO_ENV_SHARED_LIBRARIES} yaml-cpp)
-ament_target_dependencies(mhe_acado_node rclcpp std_msgs geometry_msgs nav_msgs px4_msgs  )
+ament_target_dependencies(mhe_acado_node rclcpp std_msgs geometry_msgs nav_msgs   )
 
 install(TARGETS
   # getting_started

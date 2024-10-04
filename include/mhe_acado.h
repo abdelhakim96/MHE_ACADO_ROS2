@@ -37,7 +37,6 @@ class NMHE_FXFYFZ
 		
 		bool is_estimator_init, is_prediction_init;
 
-		nmhe_struct_ nmhe_inp_struct;
 
 		Eigen::MatrixXd WL_mat;
 
@@ -45,7 +44,10 @@ class NMHE_FXFYFZ
 
 	public:
 		int acado_feedbackStep_fb;
-	
+
+		nmhe_struct_ nmhe_inp_struct;
+
+
 		struct acado_struct
 		{
 			boost::function<int(void)> initializeSolver;
@@ -97,14 +99,14 @@ class NMHE_FXFYFZ
 
 		void nmhe_init(struct acado_struct &acadostruct);
 
-		void nmhe_core(struct acado_struct &acadostruct, struct estimation_struct &estimationstruct, Eigen::VectorXd &velocity, Eigen::Vector3d &control);
+		void nmhe_core(struct acado_struct &acadostruct, struct estimation_struct &estimationstruct, Eigen::VectorXd &velocity, Eigen::VectorXd &control);
 
 		//void publish_uvw_FxFyFz(struct estimation_struct &estimationstruct);
 
 	protected:
 		//ros::NodeHandle private_nh;
 
-		void set_measurements(struct acado_struct &acadostruct, Eigen::VectorXd &currentvelrates, Eigen::Vector3d &nmpccmd);
+		void set_measurements(struct acado_struct &acadostruct, Eigen::VectorXd &currentvelrates, Eigen::Vector4d &nmpccmd);
 
 };
 

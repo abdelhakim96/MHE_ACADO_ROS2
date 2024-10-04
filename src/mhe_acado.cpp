@@ -8,12 +8,19 @@ NMHEvariables nmheVariables;
 
 NMHE_FXFYFZ::NMHE_FXFYFZ(struct nmhe_struct_ &_nmhe_inp_struct)
 {
+
+
+    std::cout<<"Entered NMHE_FXFYFZ\n";
+
     is_estimator_init = false;
     is_prediction_init = false;
 
     nmhe_inp_struct = _nmhe_inp_struct;
 
     MatrixXd WL_mat_dummy(NMHE_NX,NMHE_NX);
+
+     std::cout<<NMHE_NX <<"   NMHE_NX \n";
+ /*
     for(int i = 0; i < NMHE_NX; ++i )
     {
         for(int j = 0; j < NMHE_NX; ++j )
@@ -25,6 +32,8 @@ NMHE_FXFYFZ::NMHE_FXFYFZ(struct nmhe_struct_ &_nmhe_inp_struct)
         }
     }
 
+*/
+
     Eigen::LLT<MatrixXd> lltofWL_mat_dummy(WL_mat_dummy);
     WL_mat = lltofWL_mat_dummy.matrixL();
 
@@ -33,7 +42,7 @@ NMHE_FXFYFZ::NMHE_FXFYFZ(struct nmhe_struct_ &_nmhe_inp_struct)
     // --------------------
     // ACADO NMHE
     // --------------------
-
+\
     nmhe_struct.initializeSolver = boost::bind(nmhe_initializeSolver);
     nmhe_struct.preparationStep = boost::bind(nmhe_preparationStep);
     nmhe_struct.feedbackStep = boost::bind(nmhe_feedbackStep);
@@ -62,22 +71,27 @@ NMHE_FXFYFZ::NMHE_FXFYFZ(struct nmhe_struct_ &_nmhe_inp_struct)
     nmhe_struct.xAC = &nmheVariables.xAC[0];
     nmhe_struct.WL = &nmheVariables.WL[0];
 
-    nmhe_est_struct.u_est = nmhe_inp_struct.X0(0);
-    nmhe_est_struct.v_est = nmhe_inp_struct.X0(1);
-    nmhe_est_struct.w_est = nmhe_inp_struct.X0(2);
-    nmhe_est_struct.Fx_dist_est = nmhe_inp_struct.X0(3);
-    nmhe_est_struct.Fy_dist_est = nmhe_inp_struct.X0(4);
-    nmhe_est_struct.Fz_dist_est = nmhe_inp_struct.X0(5);
+
+
+
+
+    nmhe_est_struct.u_est = 0.0;
+    nmhe_est_struct.v_est = 0.0;
+    nmhe_est_struct.w_est = 0.0;
+
+
+    nmhe_est_struct.Fx_dist_est = 0.0;
+    nmhe_est_struct.Fy_dist_est = 0.0;
+    nmhe_est_struct.Fz_dist_est = 0.0;
     nmhe_est_struct.exe_time = 0.0;
     nmhe_est_struct.kkt_tol = 0.0;
     nmhe_est_struct.obj_val = 0.0;
 
-    if (nmhe_inp_struct.verbose)
-    {
+   
         std::cout<<"***********************************************\n";
         std::cout<<"Constructor of the class NMHE_FXFYFZ is created\n";
         std::cout<<"***********************************************\n";
-    }
+
 }
 
 NMHE_FXFYFZ::~NMHE_FXFYFZ()
@@ -91,43 +105,48 @@ bool NMHE_FXFYFZ::return_estimator_init_value()
     return NMHE_FXFYFZ::is_estimator_init;
 }
 
-void NMHE_FXFYFZ::nmhe_init( struct acado_struct &acadostruct)
+void NMHE_FXFYFZ::nmhe_init(struct acado_struct &acadostruct)
 {
-
-    if (nmhe_inp_struct.verbose)
-    {
-      std::cout<<"*********************************\n";
-      std::cout<<"NMHE_FXFYFZ_initEstimator - start\n";
-    }
+    std::cout << "*********************************\n";
+    std::cout << "NMHE_FXFYFZ_initEstimator - start\n";
 
     // Initialize the solver
-    // ---------------------
+    std::cout << "Initializing solver...\n";
     acadostruct.initializeSolver();
-
+    
     // NMHE: initialize/set the states
-    // ---------------------
+    std::cout << "Initializing states...\n";
     for (int i = 0; i < acadostruct.acado_N + 1; ++i)
     {
         for (int j = 0; j < acadostruct.acado_NX; ++j)
-            acadostruct.x[(i * acadostruct.acado_NX) + j] = nmhe_inp_struct.X0[j];
-    }
+        {
 
+                            std::cout <<acadostruct.x[0] << "acadostruct.x[0]\n";
+                            std::cout <<nmhe_inp_struct.X0[0] << "nmhe_inp_struct.X0[0]\n";
+
+                std::cout <<j << "j\n";
+                std::cout <<i << "i\n";
+
+            acadostruct.x[(i * acadostruct.acado_NX) + j] = nmhe_inp_struct.X0[j];
+        }
+    }
+    
     // NMHE: initialize/set the controls
-    // ---------------------
+    std::cout << "Initializing controls...\n";
     for (int i = 0; i < acadostruct.acado_NU * acadostruct.acado_N; ++i)
     {
         acadostruct.u[i] = 0.0;
     }
 
     // NMHE: initialize/set the online data
-    // ---------------------
+    std::cout << "Initializing online data...\n";
     for (int i = 0; i < acadostruct.acado_NOD * (acadostruct.acado_N + 1); ++i)
     {
         acadostruct.od[i] = 0.0;
     }
 
     // NMHE: initialize the measurements/reference
-    // ---------------------
+    std::cout << "Initializing measurements/reference...\n";
     for (int i = 0; i < acadostruct.acado_NY * acadostruct.acado_N; ++i)
     {
         acadostruct.y[i] = 0.0;
@@ -137,119 +156,89 @@ void NMHE_FXFYFZ::nmhe_init( struct acado_struct &acadostruct)
         acadostruct.yN[i] = 0.0;
     }
 
-    // NMHE: initialize the current state feedback
-    // ---------------------
-/*
-#if ACADO_INITIAL_STATE_FIXED
-    for (int i = 2; i < acadostruct.acado_NX; ++i)
-    {
-        if (i < 3)
-        {
-            acadostruct.x0[0] = posref.pose.position.x;
-            acadostruct.x0[1] = posref.pose.position.y;
-            acadostruct.x0[2] = posref.pose.position.z;
-        }
-        else
-            acadostruct.x0[i] = 0;
-    }
-#endif
-*/
     // NMHE: initialize the weight matrices
-    // ---------------------
-    for(int i = 0; i < acadostruct.acado_NY; ++i )
+    std::cout << "Initializing weight matrices...\n";
+    for (int i = 0; i < acadostruct.acado_NY; ++i)
     {
-        for(int j = 0; j < acadostruct.acado_NY; ++j )
+        for (int j = 0; j < acadostruct.acado_NY; ++j)
         {
-            if(i==j)
-                acadostruct.W[(i * acadostruct.acado_NY) + j] = nmhe_inp_struct.W[i];
-            else
-                acadostruct.W[(i * acadostruct.acado_NY) + j] = 0.0;
+            acadostruct.W[(i * acadostruct.acado_NY) + j] = (i == j) ? nmhe_inp_struct.W[i] : 0.0;
         }
     }
-    for(int i = 0; i < acadostruct.acado_NYN; ++i )
+    for (int i = 0; i < acadostruct.acado_NYN; ++i)
     {
-        for(int j = 0; j < acadostruct.acado_NYN; ++j )
+        for (int j = 0; j < acadostruct.acado_NYN; ++j)
         {
-            if(i==j)
-                acadostruct.WN[(i * acadostruct.acado_NYN) + j] = nmhe_inp_struct.WN[i];
-            else
-                acadostruct.WN[(i * acadostruct.acado_NYN) + j] = 0.0;
+            acadostruct.WN[(i * acadostruct.acado_NYN) + j] = (i == j) ? nmhe_inp_struct.WN[i] : 0.0;
         }
     }
 
     // NMHE: initialize the arrival cost
-    // ---------------------
-    for(int i = 0; i < acadostruct.acado_NX; ++i )
+    std::cout << "Initializing arrival cost...\n";
+    for (int i = 0; i < acadostruct.acado_NX; ++i)
     {
-        for(int j = 0; j < acadostruct.acado_NX; ++j )
+        for (int j = 0; j < acadostruct.acado_NX; ++j)
         {
-            if(i==j)
-                acadostruct.SAC[(i * acadostruct.acado_NX) + j] = 1/nmhe_inp_struct.SAC[i];
-            else
-                acadostruct.SAC[(i * acadostruct.acado_NX) + j] = 0.0001;
+            acadostruct.SAC[(i * acadostruct.acado_NX) + j] = (i == j) ? 1 / nmhe_inp_struct.SAC[i] : 0.0001;
         }
     }
-    for(int i = 0; i < acadostruct.acado_NX; ++i )
+    for (int i = 0; i < acadostruct.acado_NX; ++i)
     {
-        for(int j = 0; j < acadostruct.acado_NX; ++j )
+        for (int j = 0; j < acadostruct.acado_NX; ++j)
         {
-            if(i>=j)
-                acadostruct.WL[(i * acadostruct.acado_NX) + j] = WL_mat(i);
-            else
-                acadostruct.WL[(i * acadostruct.acado_NX) + j] = 0.0001;
+            acadostruct.WL[(i * acadostruct.acado_NX) + j] = (i >= j) ? WL_mat(i) : 0.0001;
         }
     }
 
     // Prepare first step
-    // ------------------
+    std::cout << "Preparing first step...\n";
     acadostruct.preparationStep();
 
-    acadostruct.updateArrivalCost(1);               // pass 1 to init the SAC matrix
-/*
-    std::cout<<"SAC = ";
-    for(int i = 0; i < acadostruct.acado_NX; ++i )
-    {
-        for(int j = 0; j < acadostruct.acado_NX; ++j )
-        {
-            std::cout<<nmheVariables.SAC[(i * acadostruct.acado_NX) + j]<<", ";
-        }
-        std::cout<<"\n";
-    }
-*/
-    MatrixXd SAC_dummy(acadostruct.acado_NX,acadostruct.acado_NX);
-    int is_nan = 0;
-    for(int i = 0; i < acadostruct.acado_NX; ++i )
-    {
-        for(int j = 0; j < acadostruct.acado_NX; ++j )
-        {
-            SAC_dummy(i,j) = nmheVariables.SAC[(i * acadostruct.acado_NX) + j];
-            if(std::isnan(SAC_dummy(i,j)))
-                is_nan++;
-        }
-    }
-    if(is_nan != 0)
-    {
-       // RCLCPP_ERROR_STREAM("nmheVariables.SAC has " << is_nan
-        //                 <<" NANs! \n reinitialize SAC matrix!" );
-        exit;
-    }
+    std::cout << "Updating arrival cost matrix...\n";
+    acadostruct.updateArrivalCost(1); // pass 1 to init the SAC matrix
 
-    if (nmhe_inp_struct.verbose)
+    // Check for NaN values in SAC
+    std::cout << "Checking SAC for NaN values...\n";
+    MatrixXd SAC_dummy(acadostruct.acado_NX, acadostruct.acado_NX);
+    int is_nan = 0;
+    for (int i = 0; i < acadostruct.acado_NX; ++i)
     {
-        std::cout<<"NMHE_FXFYFZ: initialized correctly\n";
-        std::cout<<"**********************************\n";
+        for (int j = 0; j < acadostruct.acado_NX; ++j)
+        {
+            SAC_dummy(i, j) = nmheVariables.SAC[(i * acadostruct.acado_NX) + j];
+            if (std::isnan(SAC_dummy(i, j)))
+            {
+                is_nan++;
+                std::cout << "NaN detected at SAC[" << i << "][" << j << "]\n";
+            }
+        }
     }
+  //  if (is_nan != 0)
+   // {
+   //     std::cerr << "nmheVariables.SAC has " << is_nan << " NaNs! Reinitializing SAC matrix!\n";
+   //     exit(1); // Exiting the program if NaNs are found
+   // }
+
+    //if (nmhe_inp_struct.verbose)
+    //{
+        std::cout << "NMHE_FXFYFZ: initialized correctly\n";
+        std::cout << "**********************************\n";
+    //}
+
     is_estimator_init = true;
 }
 
-void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_struct &estimationstruct,
-                            Eigen::VectorXd &currentvelrate, Eigen::Vector3d &control_cmd)
-{
-    Vector3d nmpc_cmd;
-    nmpc_cmd << control_cmd(0), control_cmd(1), control_cmd(2);
 
-//    std::cout<<"currentvelrate = "<<currentvelrate<<"\n";
-//    std::cout<<"-------------------"<<"\n";
+void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_struct &estimationstruct,
+                            Eigen::VectorXd &currentvelrate, Eigen::VectorXd &control_cmd)
+{
+
+
+    Vector4d nmpc_cmd;
+    nmpc_cmd << control_cmd(0), control_cmd(1), control_cmd(2), control_cmd(3);
+
+
+
 
     // set the measurement feedback
     set_measurements(acadostruct, currentvelrate, nmpc_cmd);
@@ -300,8 +289,15 @@ void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_
 
 }
 
+
+
+
+
+
+
+
 void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &currentvelrates,
-                                   Vector3d &nmpccmd)
+                                   Vector4d &nmpccmd)
 {
     // Fill in the measurement buffer, entries 1: N
     if (run_cnt < (acadostruct.acado_N + 1))
@@ -405,3 +401,4 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
         }
     }
 }
+

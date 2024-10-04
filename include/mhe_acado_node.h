@@ -33,13 +33,7 @@
 #include "std_msgs/msg/float64_multi_array.hpp"
 #include "std_msgs/msg/float64.hpp"
 
-// PX4 messages
-#include <px4_msgs/msg/vehicle_odometry.hpp>
-#include <px4_msgs/msg/vehicle_rates_setpoint.hpp>
-#include <px4_msgs/msg/offboard_control_mode.hpp>
-#include <px4_msgs/msg/trajectory_setpoint.hpp>
-#include <px4_msgs/msg/vehicle_command.hpp>
-#include <px4_msgs/msg/vehicle_control_mode.hpp>
+
 
 // Custom headers
 #include "nmhe_common.h"
@@ -59,6 +53,8 @@ class NMHENode : public rclcpp::Node{   //NMHE node class inherts rclcpp node ba
 
 public: 
       NMHENode();   //default constructor
+      NMHE_FXFYFZ* nmhe;
+      nmhe_struct_ nmhe_struct;
 private:
     rclcpp::TimerBase::SharedPtr main_loop_timer;
     void main_loop();   //main loop that keeps running;
@@ -94,12 +90,11 @@ private:
 
 
     // State variables
-    NMHE_FXFYFZ* nmhe;
-    nmhe_struct_ nmhe_struct;
+
     //online_data_struct_ online_data;
 
     std::vector<double> attitude_quat_;
-    Eigen::Vector3d control_input_;
+    Eigen::VectorXd control_input_;
     Eigen::VectorXd velocity_;
     std::vector<double> pose_;
 

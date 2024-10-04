@@ -8,7 +8,12 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-    //const double F_bouy = 114.8; // Bouyancy force (N)
+
+
+int main( )
+{
+
+        //const double F_bouy = 114.8; // Bouyancy force (N)
     const double m = 13.4;    // BlueROV2 mass (kg)  
     const double g = 9.82;  // gravitational field strength (m/s^2)
 
@@ -35,9 +40,6 @@
     const double Z_wc = -74.23 ; // quadratic damping coefficient  in z direction (N.s^2/m^2)
     const double N_rc = - 0.43 ; // quadratic damping coefficient for rotation about z direction (N.s^2/rad^2)
 
-
-int main( )
-{
     USING_NAMESPACE_ACADO
     std::string path ="/home/hakim/ros2/src/mhe_acado_ros2";
 
