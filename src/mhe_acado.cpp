@@ -17,22 +17,31 @@ NMHE_FXFYFZ::NMHE_FXFYFZ(struct nmhe_struct_ &_nmhe_inp_struct)
 
     nmhe_inp_struct = _nmhe_inp_struct;
 
-    MatrixXd WL_mat_dummy(NMHE_NX,NMHE_NX);
 
-     std::cout<<NMHE_NX <<"   NMHE_NX \n";
- /*
+ 
+     MatrixXd WL_mat_dummy(NMHE_NX,NMHE_NX);
+    
+
+  
+
     for(int i = 0; i < NMHE_NX; ++i )
     {
+
+
         for(int j = 0; j < NMHE_NX; ++j )
         {
+
+
             if(i==j)
+            {
                 WL_mat_dummy((i * NMHE_NX) + j) = 1/nmhe_inp_struct.process_noise_cov(i);        // Check for lower triangle Cholesky decomposition!
+
+            }
             else
                 WL_mat_dummy((i * NMHE_NX) + j) = 0.0001;
         }
     }
 
-*/
 
     Eigen::LLT<MatrixXd> lltofWL_mat_dummy(WL_mat_dummy);
     WL_mat = lltofWL_mat_dummy.matrixL();
@@ -74,15 +83,12 @@ NMHE_FXFYFZ::NMHE_FXFYFZ(struct nmhe_struct_ &_nmhe_inp_struct)
 
 
 
-
-    nmhe_est_struct.u_est = 0.0;
-    nmhe_est_struct.v_est = 0.0;
-    nmhe_est_struct.w_est = 0.0;
-
-
-    nmhe_est_struct.Fx_dist_est = 0.0;
-    nmhe_est_struct.Fy_dist_est = 0.0;
-    nmhe_est_struct.Fz_dist_est = 0.0;
+    nmhe_est_struct.u_est = nmhe_inp_struct.X0(0);
+    nmhe_est_struct.v_est = nmhe_inp_struct.X0(1);
+    nmhe_est_struct.w_est = nmhe_inp_struct.X0(2);
+    nmhe_est_struct.Fx_dist_est = nmhe_inp_struct.X0(3);
+    nmhe_est_struct.Fy_dist_est = nmhe_inp_struct.X0(4);
+    nmhe_est_struct.Fz_dist_est = nmhe_inp_struct.X0(5);
     nmhe_est_struct.exe_time = 0.0;
     nmhe_est_struct.kkt_tol = 0.0;
     nmhe_est_struct.obj_val = 0.0;
@@ -121,13 +127,10 @@ void NMHE_FXFYFZ::nmhe_init(struct acado_struct &acadostruct)
         for (int j = 0; j < acadostruct.acado_NX; ++j)
         {
 
-                            std::cout <<acadostruct.x[0] << "acadostruct.x[0]\n";
-                            std::cout <<nmhe_inp_struct.X0[0] << "nmhe_inp_struct.X0[0]\n";
+                    
 
-                std::cout <<j << "j\n";
-                std::cout <<i << "i\n";
-
-            acadostruct.x[(i * acadostruct.acado_NX) + j] = nmhe_inp_struct.X0[j];
+            //acadostruct.x[(i * acadostruct.acado_NX) + j] = nmhe_inp_struct.X0[j];
+             acadostruct.x[(i * acadostruct.acado_NX) + j] = 0.0;
         }
     }
     
@@ -234,8 +237,8 @@ void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_
 {
 
 
-    Vector4d nmpc_cmd;
-    nmpc_cmd << control_cmd(0), control_cmd(1), control_cmd(2), control_cmd(3);
+    Vector3d nmpc_cmd;
+    nmpc_cmd << control_cmd(0), control_cmd(1), control_cmd(2);
 
 
 
@@ -271,13 +274,19 @@ void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_
         estimationstruct.u_est = acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX)];
         estimationstruct.v_est = acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 1];
         estimationstruct.w_est = acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 2];
-        estimationstruct.Fx_dist_est = acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 3];
-        estimationstruct.Fy_dist_est = acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 4];
+
+
+       // estimationstruct.Fx_dist_est = acadostruct.x[((acadostruct.acado_N-1)*acadostruct.acado_NX) + 3];
+       estimationstruct.Fx_dist_est = acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 3];
+       estimationstruct.Fy_dist_est = acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 4];
         estimationstruct.Fz_dist_est = acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 5];
         estimationstruct.exe_time = ((double)(clock() - stopwatch))/CLOCKS_PER_SEC;
         estimationstruct.kkt_tol = acadostruct.getKKT();
         estimationstruct.obj_val = acadostruct.getObjective();
     }
+    std::cout<<" is_prediction_init!!"<<is_prediction_init <<std::endl;
+
+    std::cout<<" DISTURBANCE DEBUG!!"<<acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 3] <<std::endl;
 
     acadostruct.updateArrivalCost(0);                       // pass 0 to just update the arrival cost
 
@@ -297,7 +306,7 @@ void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_
 
 
 void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &currentvelrates,
-                                   Vector4d &nmpccmd)
+                                   Vector3d &nmpccmd)
 {
     // Fill in the measurement buffer, entries 1: N
     if (run_cnt < (acadostruct.acado_N + 1))
@@ -327,7 +336,7 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
         }
         for(int i = 0; i < acadostruct.acado_NOD; ++i )
         {
-            acadostruct.od[(run_cnt-1)*acadostruct.acado_NOD + i] = currentvelrates(i + 3);
+            acadostruct.od[(run_cnt-1)*acadostruct.acado_NOD + i] = currentvelrates(i + 5);
         }
 
         if (nmhe_inp_struct.verbose)
@@ -352,7 +361,7 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
         // Initialize measured states, measured control and online data on node N + 1
         for(int i = 0; i < acadostruct.acado_NYN; ++i )
         {
-            acadostruct.x[(run_cnt-1)*acadostruct.acado_NX + i] = currentvelrates(i);
+            acadostruct.x[(run_cnt-1)*acadostruct.acado_NX + i] =  currentvelrates(i);
         }
         for(int i = 0; i < acadostruct.acado_NU; ++i )
         {
@@ -360,7 +369,7 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
         }
         for(int i = 0; i < acadostruct.acado_NOD; ++i )
         {
-            acadostruct.od[(run_cnt-1)*acadostruct.acado_NOD + i] = currentvelrates(i + 3);
+            acadostruct.od[(run_cnt-1)*acadostruct.acado_NOD + i] = currentvelrates(i + 5);
         }
 
         if (nmhe_inp_struct.verbose)
@@ -382,22 +391,22 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
         for(int i = 0; i < acadostruct.acado_N-1; ++i )
         {
             for(int j = 0; j < acadostruct.acado_NY; ++j )
-                acadostruct.y[i*acadostruct.acado_NY + j] = acadostruct.y[(i+1)*acadostruct.acado_NY + j];
+                acadostruct.y[i*acadostruct.acado_NY + j] = acadostruct.y[(i+1)*acadostruct.acado_NY + j];  //shifting all measurments NY elements to the back
         }
 
         for(int i = 0; i < acadostruct.acado_NYN; ++i )
         {
-            acadostruct.yN[i] = currentvelrates(i);
-            acadostruct.y[(acadostruct.acado_N-1)*acadostruct.acado_NY + i] = acadostruct.yN[i];
+            acadostruct.yN[i] = currentvelrates(i);        //add new state measurments to terminal cost
+            acadostruct.y[(acadostruct.acado_N-1)*acadostruct.acado_NY + i] = acadostruct.yN[i];     //update latest element in the measurment vector with the newest state 
         }
         for(int i = acadostruct.acado_NYN; i < acadostruct.acado_NY; ++i )
         {
-            acadostruct.y[(acadostruct.acado_N-1)*acadostruct.acado_NY + i] = nmpccmd(i - acadostruct.acado_NYN);
+            acadostruct.y[(acadostruct.acado_N-1)*acadostruct.acado_NY + i] = nmpccmd(i - acadostruct.acado_NYN);   //update latest element in the measurment vector with the newest input 
         }
         for (int i = 0; i < acadostruct.acado_N + 1; ++i)
         {
             for(int j = 0; j < acadostruct.acado_NOD; ++j )
-                acadostruct.od[(i * acadostruct.acado_NOD) + j] = currentvelrates(j + 3);
+                acadostruct.od[(i * acadostruct.acado_NOD) + j] = currentvelrates(j + 5);
         }
     }
 }

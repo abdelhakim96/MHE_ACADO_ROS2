@@ -59,7 +59,7 @@ extern "C"
 /** Flag indicating whether constraint values are hard-coded or not. */
 #define NMHE_HARDCODED_CONSTRAINT_VALUES 1
 /** Indicator for fixed initial state. */
-#define NMHE_INITIAL_STATE_FIXED 1
+#define NMHE_INITIAL_STATE_FIXED 0
 /** Number of control/estimation intervals. */
 #define NMHE_N 40
 /** Number of online data values. */
@@ -73,7 +73,7 @@ extern "C"
 /** Number of differential derivative variables. */
 #define NMHE_NXD 0
 /** Number of references/measurements per node on the first N nodes. */
-#define NMHE_NY 7
+#define NMHE_NY 6
 /** Number of references/measurements on the last (N + 1)st node. */
 #define NMHE_NYN 3
 /** Total number of QP optimization variables. */
@@ -119,11 +119,11 @@ real_t u[ 120 ];
  */
 real_t od[ 41 ];
 
-/** Column vector of size: 280
+/** Column vector of size: 240
  * 
- *  Matrix containing 40 reference/measurement vectors of size 7 for first 40 nodes.
+ *  Matrix containing 40 reference/measurement vectors of size 6 for first 40 nodes.
  */
-real_t y[ 280 ];
+real_t y[ 240 ];
 
 /** Column vector of size: 3
  * 
@@ -131,8 +131,8 @@ real_t y[ 280 ];
  */
 real_t yN[ 3 ];
 
-/** Matrix of size: 7 x 7 (row major format) */
-real_t W[ 49 ];
+/** Matrix of size: 6 x 6 (row major format) */
+real_t W[ 36 ];
 
 /** Matrix of size: 3 x 3 (row major format) */
 real_t WN[ 9 ];
@@ -154,12 +154,6 @@ real_t xAC[ 6 ];
  *  Arrival cost term: Cholesky decomposition, lower triangular,  of the inverse of the state noise covariance matrix.
  */
 real_t WL[ 36 ];
-
-/** Column vector of size: 6
- * 
- *  Current state feedback vector.
- */
-real_t x0[ 6 ];
 
 
 } NMHEvariables;
@@ -189,8 +183,8 @@ real_t state[ 64 ];
 /** Column vector of size: 240 */
 real_t d[ 240 ];
 
-/** Column vector of size: 280 */
-real_t Dy[ 280 ];
+/** Column vector of size: 240 */
+real_t Dy[ 240 ];
 
 /** Column vector of size: 3 */
 real_t DyN[ 3 ];
@@ -204,20 +198,20 @@ real_t evGu[ 720 ];
 /** Row vector of size: 10 */
 real_t objValueIn[ 10 ];
 
-/** Row vector of size: 7 */
-real_t objValueOut[ 7 ];
+/** Row vector of size: 6 */
+real_t objValueOut[ 6 ];
 
 /** Matrix of size: 240 x 6 (row major format) */
 real_t Q1[ 1440 ];
 
-/** Matrix of size: 240 x 7 (row major format) */
-real_t Q2[ 1680 ];
+/** Matrix of size: 240 x 6 (row major format) */
+real_t Q2[ 1440 ];
 
 /** Matrix of size: 120 x 3 (row major format) */
 real_t R1[ 360 ];
 
-/** Matrix of size: 120 x 7 (row major format) */
-real_t R2[ 840 ];
+/** Matrix of size: 120 x 6 (row major format) */
+real_t R2[ 720 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t QN1[ 36 ];
@@ -228,26 +222,26 @@ real_t QN2[ 18 ];
 /** Column vector of size: 6 */
 real_t DxAC[ 6 ];
 
-/** Matrix of size: 19 x 15 (row major format) */
-real_t acA[ 285 ];
+/** Matrix of size: 18 x 15 (row major format) */
+real_t acA[ 270 ];
 
-/** Column vector of size: 19 */
-real_t acb[ 19 ];
+/** Column vector of size: 18 */
+real_t acb[ 18 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t acP[ 36 ];
 
-/** Row vector of size: 20 */
-real_t rk_actemp[ 20 ];
+/** Row vector of size: 19 */
+real_t rk_actemp[ 19 ];
 
-/** Matrix of size: 7 x 7 (row major format) */
-real_t acVL[ 49 ];
+/** Matrix of size: 6 x 6 (row major format) */
+real_t acVL[ 36 ];
 
-/** Matrix of size: 7 x 6 (row major format) */
-real_t acHx[ 42 ];
+/** Matrix of size: 6 x 6 (row major format) */
+real_t acHx[ 36 ];
 
-/** Matrix of size: 7 x 3 (row major format) */
-real_t acHu[ 21 ];
+/** Matrix of size: 6 x 3 (row major format) */
+real_t acHu[ 18 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t acXx[ 36 ];
@@ -258,11 +252,8 @@ real_t acXu[ 18 ];
 /** Column vector of size: 6 */
 real_t acXTilde[ 6 ];
 
-/** Column vector of size: 7 */
-real_t acHTilde[ 7 ];
-
 /** Column vector of size: 6 */
-real_t Dx0[ 6 ];
+real_t acHTilde[ 6 ];
 
 /** Matrix of size: 6 x 6 (row major format) */
 real_t T[ 36 ];

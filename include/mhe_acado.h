@@ -106,7 +106,7 @@ class NMHE_FXFYFZ
 	protected:
 		//ros::NodeHandle private_nh;
 
-		void set_measurements(struct acado_struct &acadostruct, Eigen::VectorXd &currentvelrates, Eigen::Vector4d &nmpccmd);
+		void set_measurements(struct acado_struct &acadostruct, Eigen::VectorXd &currentvelrates, Eigen::Vector3d &nmpccmd);
 
 };
 

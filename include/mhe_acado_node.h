@@ -64,16 +64,9 @@ private:
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr state_sub_;
     rclcpp::Subscription<geometry_msgs::msg::Wrench>::SharedPtr control_sub_;
 
-
-
     //Publishers
     rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr nmhe_vel_pub_;
-    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr nmhe_dist_Fx_pub_;
-
-
-//    nmhe_dist_Fx_pub = nh.advertise<std_msgs::Float64MultiArray>("nmhe_learning/Fx", 1, true);
-
-    //rclcpp::Publisher<NMHE_FXFYFZ::estimation_struct>::SharedPtr publish_uvw_FxFyFz;
+    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr nmhe_dist_F_dist_pub_;
 
    // callbacks
 
@@ -82,17 +75,10 @@ private:
     void estimation_on_cb(const std_msgs::msg::Bool::ConstSharedPtr msg);
 
     // Functions for publishing
-    //void publish_uvw_FxFyFz( struct estimation_struct& estimationstruct);
-    //void publish_wrench(struct NMPC_PC::command_struct& commandstruct);
-
-
     void publish_uvw_FxFyFz(  NMHE_FXFYFZ::estimation_struct& estimationstruct);
 
 
     // State variables
-
-    //online_data_struct_ online_data;
-
     std::vector<double> attitude_quat_;
     Eigen::VectorXd control_input_;
     Eigen::VectorXd velocity_;
