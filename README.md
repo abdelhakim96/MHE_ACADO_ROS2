@@ -32,4 +32,9 @@ colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug
 
 ```bash
 roslaunch foxglove_bridge foxglove_bridge.launch 
+<<<<<<< HEAD
 ```
+=======
+```
+
+>>>>>>> 2b8379de1388acdd31db7c8700fdf7fe599573b1
