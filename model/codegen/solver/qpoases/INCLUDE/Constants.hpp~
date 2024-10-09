@@ -35,7 +35,7 @@
 #define QPOASES_CONSTANTS_HPP
 
 #ifndef QPOASES_CUSTOM_INTERFACE
-#include "nmpc_qpoases_interface.hpp"
+#include "solver/nmpc_pc/nmpc_qpoases_interface.hpp"
 #else
 #include QPOASES_CUSTOM_INTERFACE
 #endif

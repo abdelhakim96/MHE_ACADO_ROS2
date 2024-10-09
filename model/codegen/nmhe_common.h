@@ -42,6 +42,7 @@ extern "C"
 #define NMHE_QPDUNES  3
 /** HPMPC QP solver indicator. */
 #define NMHE_HPMPC    4
+#define NMHE_GENERIC    5
 
 /** Indicator for determining the QP solver used by the ACADO solver code. */
 #define NMHE_QP_SOLVER NMHE_QPOASES
@@ -64,6 +65,8 @@ extern "C"
 #define NMHE_N 40
 /** Number of online data values. */
 #define NMHE_NOD 1
+/** Number of path constraints. */
+#define NMHE_NPAC 0
 /** Number of control variables. */
 #define NMHE_NU 3
 /** Number of differential variables. */
@@ -82,6 +85,8 @@ extern "C"
 #define NMHE_RK_NIS 2
 /** Number of Runge-Kutta stages per integration step. */
 #define NMHE_RK_NSTAGES 4
+/** Single versus double precision data type representation. */
+#define NMHE_SINGLE_PRECISION 0
 /** Providing interface for arrival cost. */
 #define NMHE_USE_ARRIVAL_COST 1
 /** Indicator for usage of non-hard-coded linear terms in the objective. */

@@ -286,7 +286,7 @@ void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_
     }
     std::cout<<" is_prediction_init!!"<<is_prediction_init <<std::endl;
 
-    std::cout<<" DISTURBANCE DEBUG!!"<<acadostruct.x[(acadostruct.acado_N*acadostruct.acado_NX) + 3] <<std::endl;
+    std::cout<<" Control DEBUG!!"<<acadostruct.u[(acadostruct.acado_N*acadostruct.acado_NU)] <<std::endl;
 
     acadostruct.updateArrivalCost(0);                       // pass 0 to just update the arrival cost
 
@@ -401,7 +401,9 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
         }
         for(int i = acadostruct.acado_NYN; i < acadostruct.acado_NY; ++i )
         {
-            acadostruct.y[(acadostruct.acado_N-1)*acadostruct.acado_NY + i] = nmpccmd(i - acadostruct.acado_NYN);   //update latest element in the measurment vector with the newest input 
+
+            std::cout<< "control: " << nmpccmd(i - acadostruct.acado_NYN) <<std::endl;
+            acadostruct.y[(acadostruct.acado_N-1)*acadostruct.acado_NY + i] = double(nmpccmd(i - acadostruct.acado_NYN));   //update latest element in the measurment vector with the newest input 
         }
         for (int i = 0; i < acadostruct.acado_N + 1; ++i)
         {

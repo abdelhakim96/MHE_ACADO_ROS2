@@ -31,7 +31,7 @@ void NMHENode::publish_uvw_FxFyFz( NMHE_FXFYFZ::estimation_struct& estimationstr
     std::vector<double> uvw_vec = {estimationstruct.u_est, estimationstruct.v_est, estimationstruct.w_est};
 
 
-    std::vector<double> F_dist_vec = {estimationstruct.Fx_dist_est, estimationstruct.Fy_dist_est, estimationstruct.Fz_dist_est};
+    std::vector<double> F_dist_vec = {estimationstruct.Fx_dist_est *11.4, estimationstruct.Fy_dist_est, estimationstruct.Fz_dist_est};
 
     auto uvw_vec_msg = std_msgs::msg::Float64MultiArray();
     uvw_vec_msg.layout.dim.push_back(std_msgs::msg::MultiArrayDimension());

@@ -10,12 +10,15 @@
 
 
 
+
 int main( )
 {
 
+   USING_NAMESPACE_ACADO
+    std::string path ="/home/hakim/ros2/src/mhe_acado_ros2/";
         //const double F_bouy = 114.8; // Bouyancy force (N)
-    const double m = 13.4;    // BlueROV2 mass (kg)  
-    const double g = 9.82;  // gravitational field strength (m/s^2)
+    const double m = 11.4;    // BlueROV2 mass (kg)  
+    const double g = 9.81;  // gravitational field strength (m/s^2)
 
     const double F_bouy = 1026 * 0.0115 * g; // Bouyancy force (N)
     const double eps = 0.00001;
@@ -40,8 +43,9 @@ int main( )
     const double Z_wc = -74.23 ; // quadratic damping coefficient  in z direction (N.s^2/m^2)
     const double N_rc = - 0.43 ; // quadratic damping coefficient for rotation about z direction (N.s^2/rad^2)
 
+    
     USING_NAMESPACE_ACADO
-    std::string path ="/home/hakim/ros2/src/mhe_acado_ros2";
+    //std::string path ="/home/hakim/ros2/src/mhe_acado_ros2";
 
     //State Variables:
     //DifferentialState x;  // the body position w.r.t X_I
@@ -69,7 +73,7 @@ int main( )
     Control X;  // Force along X_B
     Control Y;  // Force along Y_B
     Control Z;  // Force along Z_B
-    Control M_z;  // Torque about Z_B (Yawing moment)
+   // Control M_z;  // Torque about Z_B (Yawing moment)
 
     // BlueROV2 Model Parameters 
     
@@ -99,7 +103,7 @@ int main( )
    // hN << x << y << z << u << v << w << psi << r;
 
 
-    h  << u << v << w  << X << Y<< Z << M_z;
+    h  << u << v << w  << X << Y<< Z;
     hN  << u << v << w ;
 
 
@@ -110,7 +114,7 @@ int main( )
     //
     // Optimal Control Problem
     //
-    double N = 40;
+    int N = 40;
     double Ts = 0.01;
     OCP ocp(0.0, N*Ts, N);
 
@@ -119,9 +123,11 @@ int main( )
     ocp.minimizeLSQ(W, h);
     ocp.minimizeLSQEndTerm(WN, hN);
 
-    ocp.subjectTo( -10 <= Fx_dist <= 10);
-    ocp.subjectTo( -10  <= Fy_dist <= 10);
-    ocp.subjectTo( -10  <= Fz_dist <= 10);
+
+
+    ocp.subjectTo( -6 <= Fx_dist <= 6);
+    ocp.subjectTo( -6 <= Fy_dist <= 6);
+    ocp.subjectTo( -6 <= Fz_dist <= 6);
 
     // Export the code:
     OCPexport mhe( ocp );
@@ -148,30 +154,23 @@ int main( )
 
     mhe.set( PRINTLEVEL, DEBUG);
 
+
     // Optionally set custom module name:
     mhe.set( CG_MODULE_NAME, "nmhe" );
     mhe.set( CG_MODULE_PREFIX, "NMHE" );
 
-    //std::string path = ros::package::getPath("acado_ccode_generation");
-    //std::string path_dir = path + "/solver/NMHE_FxFyFzlearning";
-    //ROS_INFO("%s", path_dir.c_str());
+	if (mhe.exportCode( path + "/model/codegen" ) != SUCCESSFUL_RETURN)
 
-    //try
-   // {
-    //    ROS_WARN("TRYING TO EXPORT");
-    //    if (mhe.exportCode(path_dir) != SUCCESSFUL_RETURN) ROS_ERROR("FAIL EXPORT CODE");
-   // }
-   // catch (...)
-    //{
-    //    ROS_ERROR("FAIL TO EXPORT");
-    //}
+  //if (mhe.exportCode( path + "/model/codegen" ) != SUCCESSFUL_RETURN)
+  //		exit( EXIT_FAILURE );
 
-    if (mhe.exportCode( path + "/model/codegen" ) != SUCCESSFUL_RETURN)
-  		exit( EXIT_FAILURE );
+    
+
+    //if (mhe.exportCode( path + "/model/codegen" ) != SUCCESSFUL_RETURN)
+  	//	exit( EXIT_FAILURE );
 
     mhe.printDimensionsQP();
 
-    //ROS_WARN("DONE CCODE");
 
     return EXIT_SUCCESS;
 }
