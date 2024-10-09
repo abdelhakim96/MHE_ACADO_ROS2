@@ -28,5 +28,8 @@ source install/local_setup.sh
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug
 ```
 
+## Foxglove
 
-
+```bash
+roslaunch foxglove_bridge foxglove_bridge.launch 
+```
