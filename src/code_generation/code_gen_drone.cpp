@@ -21,7 +21,7 @@ int main( )
     const double g = 9.81;  // gravitational field strength (m/s^2)
 
     const double F_bouy = 1026 * 0.0115 * g; // Bouyancy force (N)
-    const double eps = 0.00001;
+    const double eps = 0.001;
     //const double F_bouy = 114.8; // Buoyancy force (N)
 
     const double X_ud = -2.6 ; // Added mass in x direction (kg)
@@ -45,14 +45,8 @@ int main( )
 
     
     USING_NAMESPACE_ACADO
-    //std::string path ="/home/hakim/ros2/src/mhe_acado_ros2";
 
     //State Variables:
-    //DifferentialState x;  // the body position w.r.t X_I
-    //DifferentialState y;  // the body position w.r.t Y_I
-    //DifferentialState z;  // the body position w.r.t Z_I
-
-
 	DifferentialState u;                // the translation velocity along X_B
     DifferentialState v;                // the translation velocity along Y_B
     DifferentialState w;                // the translation velocity along Z_B
@@ -61,37 +55,24 @@ int main( )
     DifferentialState Fy_dist;          // the external force along Y_B
     DifferentialState Fz_dist;          // the external force along Z_B
 
-  
-    
     //DifferentialState psi;  // yaw angle 
     OnlineData r;   // yaw rate
 
-   // OnlineData Fx_dist;  // the external disturbance force along X_B
-   // OnlineData Fy_dist;  // the external disturbance force along Y_B
-   // OnlineData Fz_dist;  // the external disturbance force along Z_B
-    // MPC control input 
     Control X;  // Force along X_B
     Control Y;  // Force along Y_B
     Control Z;  // Force along Z_B
-   // Control M_z;  // Torque about Z_B (Yawing moment)
 
-    // BlueROV2 Model Parameters 
+
     
 
     // Model equations: 2-D model, assuming no roll or pitch
     DifferentialEquation f;
 
-    //f << dot(x) == cos(psi) * u - sin(psi) * v;
-    //f << dot(y) == sin(psi) * u +  cos(psi) * v;
-    //f << dot(z) ==  w;
+
  
     f << dot(u) == (X + (m * v - Y_vd * v) * r + (X_u + X_uc *sqrt( u * u + eps) ) * u)/(m - X_ud) + Fx_dist ;
     f << dot(v) == (Y - (m * u - X_ud * u) * r + (Y_v + Y_vc *sqrt( v * v + eps) ) * v)/(m - Y_vd) + Fy_dist ;
     f << dot(w) == (Z + (Z_w + Z_wc * sqrt(w * w + eps)) * w + (m * g - F_bouy))/(m - Z_wd) + Fz_dist ;
-
-    //f << dot(psi) ==  r;
-    //f << dot(r) == (M_z - (m * v - Y_vd * v) * u - (X_ud * u - m * u) * v + (N_r + N_rc * sqrt(r * r + eps)) * r)/(I_zz - N_rd);
-    
 
 	f << dot(Fx_dist) == 0;
     f << dot(Fy_dist) == 0;
@@ -99,14 +80,9 @@ int main( )
 
     // Reference functions and weighting matrices:
     Function h, hN;
-   // h << x << y << z << u << v << w << psi << r << X << Y<< Z << M_z;
-   // hN << x << y << z << u << v << w << psi << r;
-
 
     h  << u << v << w  << X << Y<< Z;
     hN  << u << v << w ;
-
-
 
     BMatrix W = eye<bool>( h.getDim() );
     BMatrix WN = eye<bool>( hN.getDim() );
@@ -123,11 +99,10 @@ int main( )
     ocp.minimizeLSQ(W, h);
     ocp.minimizeLSQEndTerm(WN, hN);
 
-
-
     ocp.subjectTo( -6 <= Fx_dist <= 6);
     ocp.subjectTo( -6 <= Fy_dist <= 6);
     ocp.subjectTo( -6 <= Fz_dist <= 6);
+
 
     // Export the code:
     OCPexport mhe( ocp );
@@ -158,8 +133,12 @@ int main( )
     // Optionally set custom module name:
     mhe.set( CG_MODULE_NAME, "nmhe" );
     mhe.set( CG_MODULE_PREFIX, "NMHE" );
+   std::cout<<"this is the code gen!";
+
 
 	if (mhe.exportCode( path + "/model/codegen" ) != SUCCESSFUL_RETURN)
+    		exit( EXIT_FAILURE );
+
 
   //if (mhe.exportCode( path + "/model/codegen" ) != SUCCESSFUL_RETURN)
   //		exit( EXIT_FAILURE );

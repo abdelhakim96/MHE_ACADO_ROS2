@@ -252,7 +252,8 @@ void NMHE_FXFYFZ::nmhe_core(struct acado_struct &acadostruct, struct estimation_
     // Execute Calculation (Optimization)
     clock_t stopwatch;
     stopwatch = clock();
-    acado_feedbackStep_fb = acadostruct.feedbackStep();
+    if (run_cnt>(acadostruct.acado_N))
+        acado_feedbackStep_fb = acadostruct.feedbackStep();
 
     if (nmhe_inp_struct.verbose && acado_feedbackStep_fb != 0)
     {
@@ -309,7 +310,7 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
                                    Vector3d &nmpccmd)
 {
     // Fill in the measurement buffer, entries 1: N
-    if (run_cnt < (acadostruct.acado_N + 1))
+    if (run_cnt < (acadostruct.acado_N ))
     {
         for(int i = 0; i < acadostruct.acado_NYN; ++i )
         {
@@ -327,19 +328,28 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
         // Initialize solver, measured states, measured control and online data on shooting nodes 1: N
         for(int i = 0; i < acadostruct.acado_NX-3; ++i )
         {
-            acadostruct.x[(run_cnt-1)*acadostruct.acado_NX + i] = currentvelrates(i);
+
+            std::cout<<"i: "<<i<<std::endl;
+            std::cout<<"(run_cnt-1)*acadostruct.acado_NX + i "<<(run_cnt-1)*acadostruct.acado_NX + i<<std::endl;
+
+            //acadostruct.x[(run_cnt-1)*acadostruct.acado_NX + i] = currentvelrates(i);
+            acadostruct.x[(run_cnt-1)*acadostruct.acado_NX + i] = 0.0;
         }
         for(int i = 0; i < acadostruct.acado_NU; ++i )
         {
             if (run_cnt > 1)
                 acadostruct.u[(run_cnt-2)*acadostruct.acado_NU + i] = nmpccmd(i);
+                              //  acadostruct.u[(run_cnt-2)*acadostruct.acado_NU + i] = 0.0;
+
         }
         for(int i = 0; i < acadostruct.acado_NOD; ++i )
         {
             acadostruct.od[(run_cnt-1)*acadostruct.acado_NOD + i] = currentvelrates(i + 5);
+           //             acadostruct.od[(run_cnt-1)*acadostruct.acado_NOD + i] = 0.0;
+
         }
 
-        if (nmhe_inp_struct.verbose)
+        //if (nmhe_inp_struct.verbose)
             std::cout<<"run_cnt = "<<run_cnt<<"\n";
 
         // Increment counter
@@ -347,7 +357,7 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
     }
 
     // Initialize measurements on node N + 1,
-    else if(run_cnt == (acadostruct.acado_N + 1))
+    else if(run_cnt == (acadostruct.acado_N ))
     {
         for(int i = 0; i < acadostruct.acado_NYN; ++i )
             acadostruct.yN[i] = currentvelrates(i);
@@ -361,7 +371,9 @@ void NMHE_FXFYFZ::set_measurements(struct acado_struct &acadostruct, VectorXd &c
         // Initialize measured states, measured control and online data on node N + 1
         for(int i = 0; i < acadostruct.acado_NYN; ++i )
         {
-            acadostruct.x[(run_cnt-1)*acadostruct.acado_NX + i] =  currentvelrates(i);
+             acadostruct.x[(run_cnt-1)*acadostruct.acado_NX + i] =  currentvelrates(i);
+            //acadostruct.x[(run_cnt-1)*acadostruct.acado_NX + i] =  0.0;
+
         }
         for(int i = 0; i < acadostruct.acado_NU; ++i )
         {
