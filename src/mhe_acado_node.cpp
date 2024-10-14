@@ -18,7 +18,7 @@
 #include <cmath>
 
 
-#define SAMPLE_TIME 10ms
+#define SAMPLE_TIME 50ms
 
 
 
@@ -31,7 +31,7 @@ void NMHENode::publish_uvw_FxFyFz( NMHE_FXFYFZ::estimation_struct& estimationstr
     std::vector<double> uvw_vec = {estimationstruct.u_est, estimationstruct.v_est, estimationstruct.w_est};
 
 
-    std::vector<double> F_dist_vec = {estimationstruct.Fx_dist_est *14.0, estimationstruct.Fy_dist_est, estimationstruct.Fz_dist_est};
+    std::vector<double> F_dist_vec = {estimationstruct.Fx_dist_est*2, estimationstruct.Fy_dist_est*2, estimationstruct.Fz_dist_est};
 
     auto uvw_vec_msg = std_msgs::msg::Float64MultiArray();
     uvw_vec_msg.layout.dim.push_back(std_msgs::msg::MultiArrayDimension());
@@ -167,7 +167,7 @@ NMHENode::NMHENode() : Node("nmhe_node")
     //this->nmhe_struct.W << 10.0, 10.0, 0.02, 0.2, 0.02, 0.02;
     
     
-    this->nmhe_struct.W <<  1.0, 1.0, 1.0, 10.0, 10.0, 10.0; // weights
+    this->nmhe_struct.W <<  1000.0, 100.0, 10000.0, 100000.0, 10000.0, 10000.0; // weights
 
     this->nmhe_struct.WN << 1.0, 1., 1.1;  // terminal weights
     
